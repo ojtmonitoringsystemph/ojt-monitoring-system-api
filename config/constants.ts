@@ -19,4 +19,10 @@ export const config = {
     API_KEY: "955948597478288",
     API_SECRET: "Q-qTBc4jUiF9j-kMPii6vDaj2pc",
   },
+
+  JWT: {
+    SECRET: (process.env.JWT_SECRET as string) || "ojt-secret-key",
+    EXPIRES_IN: (process.env.JWT_EXPIRES_IN as string) || "7d",
+    REFRESH_EXPIRES_IN: (process.env.JWT_REFRESH_EXPIRES_IN as string) || "30d",
+  },
 };

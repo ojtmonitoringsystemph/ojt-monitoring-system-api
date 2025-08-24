@@ -17,6 +17,20 @@ const options = {
         url: "http://localhost:5000/api",
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
   // Path to the API docs
   apis: ["./controllers/*.ts", "./routes/*.ts"],

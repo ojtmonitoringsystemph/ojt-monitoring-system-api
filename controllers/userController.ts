@@ -1,10 +1,11 @@
-import { Request, Response, NextFunction } from "express";
-import { UserService } from "../services/userService";
-import { CloudinaryService } from "../services/cloudinaryService";
-import { upload } from "../middleware/multer";
+import { NextFunction, Request, Response } from "express";
 import { route } from "express-extract-routes";
+import { requireAuthentication } from "../helpers/auth";
 import { AppError } from "../middleware/errorHandler";
+import { upload } from "../middleware/multer";
 import { UseMiddleware } from "../middleware/useMiddleware";
+import { CloudinaryService } from "../services/cloudinaryService";
+import { UserService } from "../services/userService";
 
 // Purpose: This controller class is responsible for handling the user related requests.
 @route("/user")
@@ -19,7 +20,7 @@ export class UserController {
 
   /**
    * @swagger
-   * /user/get/{id}:
+   * /user/{id}:
    *   get:
    *     summary: Get a user by ID
    *     tags: [User]
@@ -36,7 +37,7 @@ export class UserController {
    *       404:
    *         description: User not found
    */
-  @route.get("/get/:id")
+  @route.get("/:id")
   getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = await this.userService.getUser(req.params.id);
@@ -48,19 +49,26 @@ export class UserController {
 
   /**
    * @swagger
-   * /user/get/all:
+   * /user:
    *   get:
    *     summary: Get the users
    *     tags: [User]
+   *     security:
+   *       - bearerAuth: []
    *     responses:
    *       200:
    *         description: The user data
    *       404:
    *         description: User not found
+   *       401:
+   *         description: Unauthorized
    */
-  @route.get("/get/all")
-  getUsers = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  @route.get("/")
+  getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
       const users = await this.userService.getUsers();
       res.json(users);
     } catch (error) {
@@ -70,45 +78,12 @@ export class UserController {
 
   /**
    * @swagger
-   * /user/create:
-   *   post:
-   *     summary: Create a new user
-   *     tags: [User]
-   *     requestBody:
-   *      required: true
-   *      content:
-   *        application/json:
-   *          schema:
-   *            type: object
-   *            properties:
-   *              username:
-   *                type: string
-   *              email:
-   *                type: string
-   *              password:
-   *                type: string
-   *     responses:
-   *       200:
-   *         description: User created successfully
-   *       404:
-   *         description: User not found
-   */
-  @route.post("/create")
-  create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const user = await this.userService.createUser(req.body);
-      res.status(201).json(user);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  /**
-   * @swagger
-   * /user/update:
+   * /user:
    *   put:
    *     summary: Update a user
    *     tags: [User]
+   *     security:
+   *       - bearerAuth: []
    *     requestBody:
    *      required: true
    *      content:
@@ -127,10 +102,15 @@ export class UserController {
    *         description: User updated successfully
    *       404:
    *         description: User not found
+   *       401:
+   *         description: Unauthorized
    */
-  @route.put("/update")
+  @route.patch("/")
   update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
       const user = await this.userService.updateUser(req.body);
       res.json(user);
     } catch (error) {
@@ -140,10 +120,12 @@ export class UserController {
 
   /**
    * @swagger
-   * /user/delete/{id}:
+   * /user/{id}:
    *   delete:
    *     summary: Delete a user by ID
    *     tags: [User]
+   *     security:
+   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
@@ -156,10 +138,15 @@ export class UserController {
    *         description: User deleted successfully
    *       404:
    *         description: User not found
+   *       401:
+   *         description: Unauthorized
    */
-  @route.delete("/delete")
+  @route.delete("/:id")
   delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
       await this.userService.deleteUser(req.params.id);
       res.send("User deleted successfully");
     } catch (error) {
@@ -173,6 +160,8 @@ export class UserController {
    *   post:
    *     summary: Search for a user
    *     tags: [User]
+   *     security:
+   *       - bearerAuth: []
    *     requestBody:
    *       required: true
    *       content:
@@ -188,10 +177,15 @@ export class UserController {
    *         description: The user data
    *       404:
    *         description: User not found
+   *       401:
+   *         description: Unauthorized
    */
   @route.post("/search")
   search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
       const user = await this.userService.searchUser(req.body);
       res.json(user);
     } catch (error) {
@@ -201,10 +195,12 @@ export class UserController {
 
   /**
    * @swagger
-   * /user/upload-image/{id}:
+   * /user/upload/{id}:
    *   post:
    *     summary: Upload user profile image
    *     tags: [User]
+   *     security:
+   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
@@ -220,11 +216,21 @@ export class UserController {
    *               image:
    *                 type: string
    *                 format: binary
+   *     responses:
+   *       200:
+   *         description: Image uploaded successfully
+   *       400:
+   *         description: No image provided
+   *       401:
+   *         description: Unauthorized
    */
-  @route.post("/upload-image/:id")
+  @route.post("/upload/:id")
   @UseMiddleware(upload.single("image"))
   async uploadImage(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
       if (!req.file) {
         throw new AppError("Please upload an image", 400);
       }
