@@ -9,6 +9,18 @@ export class AppError extends Error {
     super(message);
     this.statusCode = statusCode;
   }
+
+  toJSON() {
+    return {
+      status: "error",
+      message: this.message,
+      statusCode: this.statusCode,
+      stack:
+        process.env.NODE_ENV === "production"
+          ? "🚫"
+          : this.stack?.split("\n").map((msg) => msg.trim()),
+    };
+  }
 }
 
 // Not found route handler
@@ -18,18 +30,16 @@ export const notFound = (_req: Request, _res: Response, next: NextFunction): voi
 };
 
 // Error handler middleware
-export const errorHandler = (err: Error, _req: Request, res: Response): void => {
+export const errorHandler = (
+  err: Error,
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+): void => {
   logger.error(err.message);
 
   if (err instanceof AppError) {
-    res.status(err.statusCode).json({
-      status: "error",
-      message: err.message,
-      stack:
-        process.env.NODE_ENV === "production"
-          ? "🚫"
-          : err.stack?.split("\n").map((msg) => msg.trim()),
-    });
+    res.status(err.statusCode).json(err.toJSON());
   } else {
     res.status(500).json({
       status: "error",
