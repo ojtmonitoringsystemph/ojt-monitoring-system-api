@@ -20,6 +20,45 @@ export class UserController {
 
   /**
    * @swagger
+   * /user:
+   *   post:
+   *     summary: Create a user
+   *     tags: [User]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *      required: true
+   *      content:
+   *        application/json:
+   *          schema:
+   *            type: object
+   *            properties:
+   *              username:
+   *                type: string
+   *              email:
+   *                type: string
+   *              password:
+   *                type: string
+   *     responses:
+   *       200:
+   *         description: User updated successfully
+   *       404:
+   *         description: User not found
+   *       401:
+   *         description: Unauthorized
+   */
+  @route.post("/")
+  createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = await this.userService.createUser(req.body);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * @swagger
    * /user/{id}:
    *   get:
    *     summary: Get a user by ID
@@ -69,7 +108,8 @@ export class UserController {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
-      const users = await this.userService.getUsers();
+      const role = req.query.role as string | undefined;
+      const users = await this.userService.getUsers(role);
       res.json(users);
     } catch (error) {
       next(error);
