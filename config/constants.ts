@@ -17,7 +17,7 @@ export const config = {
   CLOUDINARY: {
     CLOUD_NAME: "ojt-dev",
     API_KEY: "955948597478288",
-    API_SECRET: "Q-qTBc4jUiF9j-kMPii6vDaj2pc",
+    API_SECRET: "_c1SsqbbATpbO-hSRfB4eIeUXUo",
   },
 
   JWT: {
