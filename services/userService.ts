@@ -19,8 +19,32 @@ export class UserService {
     return user;
   }
 
-  async getUsers(): Promise<UserModel[]> {
-    return this.userRepository.getUsers();
+  async getUsers(role?: string): Promise<UserModel[]> {
+    return this.userRepository.getUsers(role);
+  }
+
+  async createUser(userData: Partial<UserModel>) {
+    if (!userData.firstName || !userData.lastName) {
+      throw new AppError("User firstname and lastname data are required", 400);
+    }
+
+    if (!userData.email) {
+      throw new AppError("Email is required", 400);
+    }
+
+    if (!userData.role) {
+      throw new AppError("Invalid role. Must be admin, coordinator, or student", 400);
+    }
+
+    const existingUserByEmail = await this.userRepository.searchAndUpdate({
+      email: userData.email,
+    });
+
+    if (existingUserByEmail) {
+      throw new AppError("User with this email are alrady exists", 400);
+    }
+
+    return await this.userRepository.createUser(userData);
   }
 
   async updateUser(updateData: Partial<UserModel>): Promise<UserModel | null> {

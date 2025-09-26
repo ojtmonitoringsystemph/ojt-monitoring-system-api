@@ -18,11 +18,11 @@ export class AuthService {
    * Register a new user
    */
   async register(registerData: RegisterData): Promise<AuthResponse> {
-    const { username, email, password } = registerData;
+    const { firstName, lastName, middleName, email, password, role } = registerData;
 
     // Basic validation
-    if (!username || !email || !password) {
-      throw new AppError("Username, email, and password are required", 400);
+    if (!firstName || !lastName || !email || !password) {
+      throw new AppError("Name, email, role, and password are required", 400);
     }
 
     if (password.length < 6) {
@@ -46,7 +46,10 @@ export class AuthService {
 
     // Create user
     const newUser = await this.userRepository.createUser({
-      username,
+      firstName,
+      lastName,
+      middleName,
+      role,
       email,
       password: hashedPassword,
     });
@@ -55,7 +58,7 @@ export class AuthService {
     const { accessToken, refreshToken } = await generateTokens({
       id: newUser._id.toString(),
       email: newUser.email,
-      username: newUser.username,
+      firstName: newUser.firstName,
     });
 
     // Remove password from response
@@ -95,7 +98,7 @@ export class AuthService {
     const { accessToken, refreshToken } = await generateTokens({
       id: user._id.toString(),
       email: user.email,
-      username: user.username,
+      firstName: user.firstName,
     });
 
     // Remove password from response
@@ -125,7 +128,7 @@ export class AuthService {
       const tokens = await generateTokens({
         id: user._id.toString(),
         email: user.email,
-        username: user.username,
+        firstName: user.firstName,
       });
 
       return tokens;

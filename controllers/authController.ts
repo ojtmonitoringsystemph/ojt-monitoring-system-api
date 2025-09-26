@@ -64,9 +64,22 @@ export class AuthController {
   @route.post("/register")
   register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { username, email, password } = req.body as RegisterData;
+      const { firstName, lastName, middleName, role, email, password } = req.body as RegisterData;
 
-      const result = await this.authService.register({ username, email, password });
+      // Validate user student by default cannot create a user role is admin and coordinator
+      if (role === "admin" || role === "coordinator") {
+        throw new AppError("Students cannot create admin or coordinator accounts", 403);
+      }
+
+      const result = await this.authService.register({
+        firstName,
+        lastName,
+        middleName,
+        role,
+        email,
+        password,
+      });
+
       res.status(201).json({
         status: "success",
         message: "User registered successfully",

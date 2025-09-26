@@ -9,7 +9,11 @@ export class UserRepository {
   }
 
   // This method returns all the user in the database.
-  async getUsers(): Promise<UserModel[]> {
+  async getUsers(role?: string): Promise<UserModel[]> {
+    if (role) {
+      return User.find({ role: `${role}` });
+    }
+
     return User.find();
   }
 

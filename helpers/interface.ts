@@ -6,7 +6,10 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  username: string;
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  role: "admin" | "coordinator" | "student";
   email: string;
   password: string;
 }
@@ -14,7 +17,7 @@ export interface RegisterData {
 export interface TokenPayload {
   id: string;
   email: string;
-  username: string;
+  firstName: string;
 }
 
 export interface AuthResponse {
