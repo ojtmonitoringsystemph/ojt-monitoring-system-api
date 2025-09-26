@@ -3,8 +3,8 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface DocumentsModel extends Document {
   student: Schema.Types.ObjectId;
   program: "bsit" | "bsba";
-  fileType: string;
-  fileUrl: string;
+  fileType?: string;
+  fileUrl: string[];
   status: "pending" | "approved" | "rejected";
   uploadedAt: Date;
   remarks: string;
@@ -23,12 +23,13 @@ const documentSchema = new Schema<DocumentsModel>({
   },
   fileType: {
     type: String,
-    required: true,
   },
-  fileUrl: {
-    type: String,
-    required: true,
-  },
+  fileUrl: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
   status: {
     type: String,
     enum: ["pending", "approved", "rejected"],

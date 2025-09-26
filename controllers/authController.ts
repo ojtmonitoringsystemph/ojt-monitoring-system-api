@@ -13,54 +13,6 @@ export class AuthController {
     this.authService = new AuthService();
   }
 
-  /**
-   * @swagger
-   * /auth/register:
-   *   post:
-   *     summary: Register a new user
-   *     tags: [Authentication]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - username
-   *               - email
-   *               - password
-   *             properties:
-   *               username:
-   *                 type: string
-   *                 description: The user's username
-   *               email:
-   *                 type: string
-   *                 format: email
-   *                 description: The user's email address
-   *               password:
-   *                 type: string
-   *                 minLength: 6
-   *                 description: The user's password
-   *     responses:
-   *       201:
-   *         description: User registered successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 user:
-   *                   type: object
-   *                   description: User data without password
-   *                 accessToken:
-   *                   type: string
-   *                   description: JWT access token
-   *                 refreshToken:
-   *                   type: string
-   *                   description: JWT refresh token
-   *       400:
-   *         description: Validation error or user already exists
-   */
   @route.post("/register")
   register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -90,49 +42,6 @@ export class AuthController {
     }
   };
 
-  /**
-   * @swagger
-   * /auth/login:
-   *   post:
-   *     summary: Login user
-   *     tags: [Authentication]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - email
-   *               - password
-   *             properties:
-   *               email:
-   *                 type: string
-   *                 format: email
-   *                 description: The user's email address
-   *               password:
-   *                 type: string
-   *                 description: The user's password
-   *     responses:
-   *       200:
-   *         description: User logged in successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 user:
-   *                   type: object
-   *                   description: User data without password
-   *                 accessToken:
-   *                   type: string
-   *                   description: JWT access token
-   *                 refreshToken:
-   *                   type: string
-   *                   description: JWT refresh token
-   *       401:
-   *         description: Invalid credentials
-   */
   @route.post("/login")
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -149,41 +58,6 @@ export class AuthController {
     }
   };
 
-  /**
-   * @swagger
-   * /auth/refresh:
-   *   post:
-   *     summary: Refresh access token
-   *     tags: [Authentication]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - refreshToken
-   *             properties:
-   *               refreshToken:
-   *                 type: string
-   *                 description: The refresh token
-   *     responses:
-   *       200:
-   *         description: Token refreshed successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 accessToken:
-   *                   type: string
-   *                   description: New JWT access token
-   *                 refreshToken:
-   *                   type: string
-   *                   description: New JWT refresh token
-   *       401:
-   *         description: Invalid or expired refresh token
-   */
   @route.post("/refresh")
   refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -204,28 +78,6 @@ export class AuthController {
     }
   };
 
-  /**
-   * @swagger
-   * /auth/profile:
-   *   get:
-   *     summary: Get user profile
-   *     tags: [Authentication]
-   *     security:
-   *       - bearerAuth: []
-   *     responses:
-   *       200:
-   *         description: User profile retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 user:
-   *                   type: object
-   *                   description: User data without password
-   *       401:
-   *         description: Unauthorized or invalid token
-   */
   @route.get("/profile")
   getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -246,39 +98,6 @@ export class AuthController {
     }
   };
 
-  /**
-   * @swagger
-   * /auth/change-password:
-   *   patch:
-   *     summary: Change user password
-   *     tags: [Authentication]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - currentPassword
-   *               - newPassword
-   *             properties:
-   *               currentPassword:
-   *                 type: string
-   *                 description: The user's current password
-   *               newPassword:
-   *                 type: string
-   *                 minLength: 6
-   *                 description: The user's new password
-   *     responses:
-   *       200:
-   *         description: Password changed successfully
-   *       400:
-   *         description: Validation error or incorrect current password
-   *       401:
-   *         description: Unauthorized or invalid token
-   */
   @route.patch("/change-password")
   changePassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -307,18 +126,6 @@ export class AuthController {
     }
   };
 
-  /**
-   * @swagger
-   * /auth/logout:
-   *   post:
-   *     summary: Logout user (client-side token removal)
-   *     tags: [Authentication]
-   *     security:
-   *       - bearerAuth: []
-   *     responses:
-   *       200:
-   *         description: User logged out successfully
-   */
   @route.post("/logout")
   logout = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
