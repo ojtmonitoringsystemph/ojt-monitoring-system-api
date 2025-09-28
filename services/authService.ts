@@ -76,11 +76,11 @@ export class AuthService {
    * Login user
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const { email, password } = credentials;
+    const { email, password, role } = credentials;
 
     // Basic validation
-    if (!email || !password) {
-      throw new AppError("Email and password are required", 400);
+    if (!email || !password || !role) {
+      throw new AppError("Email, role and password are required", 400);
     }
 
     // Find user
@@ -100,6 +100,7 @@ export class AuthService {
       id: user._id.toString(),
       email: user.email,
       firstName: user.firstName,
+      role: user.role,
     });
 
     // Remove password from response
