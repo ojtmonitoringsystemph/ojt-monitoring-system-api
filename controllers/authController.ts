@@ -47,9 +47,9 @@ export class AuthController {
   @route.post("/login")
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { email, password } = req.body as LoginCredentials;
+      const { email, password, role } = req.body as LoginCredentials;
 
-      const result = await this.authService.login({ email, password });
+      const result = await this.authService.login({ email, password, role });
       res.json({
         status: "success",
         message: "User logged in successfully",

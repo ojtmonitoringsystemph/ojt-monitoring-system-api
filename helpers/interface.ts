@@ -3,6 +3,7 @@ import { UserModel } from "@/models/userModel";
 export interface LoginCredentials {
   email: string;
   password: string;
+  role: "admin" | "coordinator" | "student";
 }
 
 export interface RegisterData {
@@ -19,6 +20,7 @@ export interface TokenPayload {
   id: string;
   email: string;
   firstName: string;
+  role?: "admin" | "coordinator" | "student";
 }
 
 export interface AuthResponse {
