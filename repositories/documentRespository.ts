@@ -38,18 +38,18 @@ export class DocumentsRepository {
     return Documents.findOne(query);
   }
 
-  // This method adds file URLs to the document's fileUrl array (prevents duplicates)
-  async addFilesToDocument(id: string, fileUrls: string[]): Promise<DocumentsModel | null> {
+  // This method adds file URLs to the document's documents array (prevents duplicates)
+  async addFilesToDocument(id: string, documents: string[]): Promise<DocumentsModel | null> {
     return Documents.findByIdAndUpdate(
       id,
-      { $addToSet: { fileUrl: { $each: fileUrls } } },
+      { $addToSet: { documents: { $each: documents } } },
       { new: true }
     );
   }
 
-  // This method removes specific file URLs from the document's fileUrl array
-  async removeFilesFromDocument(id: string, fileUrls: string[]): Promise<DocumentsModel | null> {
-    return Documents.findByIdAndUpdate(id, { $pullAll: { fileUrl: fileUrls } }, { new: true });
+  // This method removes specific file URLs from the document's documents array
+  async removeFilesFromDocument(id: string, documents: string[]): Promise<DocumentsModel | null> {
+    return Documents.findByIdAndUpdate(id, { $pullAll: { documents: documents } }, { new: true });
   }
 
   async searchAndUpdate(

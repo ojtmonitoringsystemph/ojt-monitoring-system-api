@@ -16,7 +16,8 @@ export class AuthController {
   @route.post("/register")
   register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { firstName, lastName, middleName, role, email, password } = req.body as RegisterData;
+      const { firstName, lastName, middleName, role, email, password, program } =
+        req.body as RegisterData;
 
       // Validate user student by default cannot create a user role is admin and coordinator
       if (role === "admin" || role === "coordinator") {
@@ -30,6 +31,7 @@ export class AuthController {
         role,
         email,
         password,
+        program,
       });
 
       res.status(201).json({

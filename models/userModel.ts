@@ -8,6 +8,7 @@ export interface UserModel extends Document {
   email: string;
   password: string;
   avatar?: string;
+  program?: "bsit" | "bsba";
   role: "admin" | "coordinator" | "student";
 }
 
@@ -32,6 +33,10 @@ const UserSchema = new Schema<UserModel>(
     password: {
       type: String,
       required: true,
+    },
+    program: {
+      type: String,
+      enum: ["bsit", "bsba"],
     },
     avatar: {
       type: String,

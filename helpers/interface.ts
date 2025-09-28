@@ -9,6 +9,7 @@ export interface RegisterData {
   firstName: string;
   lastName: string;
   middleName: string;
+  program: "bsit" | "bsba";
   role: "admin" | "coordinator" | "student";
   email: string;
   password: string;

@@ -2,9 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 
 export interface DocumentsModel extends Document {
   student: Schema.Types.ObjectId;
-  program: "bsit" | "bsba";
-  fileType?: string;
-  fileUrl: string[];
+  documents: string[];
   status: "pending" | "approved" | "rejected";
   uploadedAt: Date;
   remarks: string;
@@ -16,15 +14,7 @@ const documentSchema = new Schema<DocumentsModel>({
     ref: "User",
     required: true,
   },
-  program: {
-    type: String,
-    enum: ["bsit", "bsba"],
-    required: true,
-  },
-  fileType: {
-    type: String,
-  },
-  fileUrl: [
+  documents: [
     {
       type: String,
       required: true,

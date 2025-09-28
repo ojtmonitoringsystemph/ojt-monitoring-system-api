@@ -18,7 +18,7 @@ export class AuthService {
    * Register a new user
    */
   async register(registerData: RegisterData): Promise<AuthResponse> {
-    const { firstName, lastName, middleName, email, password, role } = registerData;
+    const { firstName, lastName, middleName, email, password, role, program } = registerData;
 
     // Basic validation
     if (!firstName || !lastName || !email || !password) {
@@ -50,6 +50,7 @@ export class AuthService {
       lastName,
       middleName,
       role,
+      program,
       email,
       password: hashedPassword,
     });
