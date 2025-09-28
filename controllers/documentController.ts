@@ -29,18 +29,16 @@ export class DocumentsController {
       }
 
       // Upload all files to Cloudinary
-      const fileUrls: string[] = [];
+      const documents: string[] = [];
       for (const file of req.files) {
-        const fileUrl = await this.cloudinaryService.uploadFile(file, "documents");
-        fileUrls.push(fileUrl);
+        const document = await this.cloudinaryService.uploadFile(file, "documents");
+        documents.push(document);
       }
 
       // Create new document with uploaded files
       const documentData = {
         student: req.body.student,
-        program: req.body.program,
-        fileType: req.body.fileType,
-        fileUrl: fileUrls,
+        documents: documents,
         status: "pending" as const,
         remarks: req.body.remarks || "",
       };
@@ -55,6 +53,9 @@ export class DocumentsController {
   @route.get("/:id")
   getDocument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
       const document = await this.documentService.getDocument(req.params.id);
       res.json(document);
     } catch (error) {
@@ -143,13 +144,13 @@ export class DocumentsController {
       }
 
       // Upload all files to Cloudinary
-      const fileUrls: string[] = [];
+      const documents: string[] = [];
       for (const file of req.files) {
-        const fileUrl = await this.cloudinaryService.uploadFile(file, "documents");
-        fileUrls.push(fileUrl);
+        const document = await this.cloudinaryService.uploadFile(file, "documents");
+        documents.push(document);
       }
 
-      const document = await this.documentService.addFilesToDocument(req.params.id, fileUrls);
+      const document = await this.documentService.addFilesToDocument(req.params.id, documents);
       res.json(document);
     } catch (error) {
       next(error);
@@ -162,12 +163,12 @@ export class DocumentsController {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
-      const { fileUrls } = req.body;
-      if (!fileUrls || !Array.isArray(fileUrls) || fileUrls.length === 0) {
+      const { documents } = req.body;
+      if (!documents || !Array.isArray(documents) || documents.length === 0) {
         throw new AppError("File URLs array is required", 400);
       }
 
-      const document = await this.documentService.removeFilesFromDocument(req.params.id, fileUrls);
+      const document = await this.documentService.removeFilesFromDocument(req.params.id, documents);
       res.json(document);
     } catch (error) {
       next(error);

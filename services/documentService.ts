@@ -53,11 +53,6 @@ export class DocumentsService {
       throw new AppError("Invalid status value", 400);
     }
 
-    // Validate program if it's being updated
-    if (updateData.program && !["bsit", "bsba"].includes(updateData.program)) {
-      throw new AppError("Invalid program value", 400);
-    }
-
     const document = await this.documentRepository.updateDocument(updateData._id, updateData);
     return document;
   }
@@ -70,12 +65,12 @@ export class DocumentsService {
     return document;
   }
 
-  async addFilesToDocument(id: string, fileUrls: string[]): Promise<DocumentsModel | null> {
+  async addFilesToDocument(id: string, documents: string[]): Promise<DocumentsModel | null> {
     if (!id) {
       throw new AppError("Document ID is required", 400);
     }
-    if (!fileUrls || fileUrls.length === 0) {
-      throw new AppError("File URLs are required", 400);
+    if (!documents || documents.length === 0) {
+      throw new AppError("Documents are required", 400);
     }
 
     // Check if document exists first
@@ -84,15 +79,15 @@ export class DocumentsService {
       throw new AppError("Document not found", 404);
     }
 
-    return await this.documentRepository.addFilesToDocument(id, fileUrls);
+    return await this.documentRepository.addFilesToDocument(id, documents);
   }
 
-  async removeFilesFromDocument(id: string, fileUrls: string[]): Promise<DocumentsModel | null> {
+  async removeFilesFromDocument(id: string, documents: string[]): Promise<DocumentsModel | null> {
     if (!id) {
       throw new AppError("Document ID is required", 400);
     }
-    if (!fileUrls || fileUrls.length === 0) {
-      throw new AppError("File URLs are required", 400);
+    if (!documents || documents.length === 0) {
+      throw new AppError("Documents are required", 400);
     }
 
     // Check if document exists first
@@ -101,7 +96,7 @@ export class DocumentsService {
       throw new AppError("Document not found", 404);
     }
 
-    return await this.documentRepository.removeFilesFromDocument(id, fileUrls);
+    return await this.documentRepository.removeFilesFromDocument(id, documents);
   }
 
   async searchDocument(query: FilterQuery<DocumentsModel>): Promise<DocumentsModel | null> {
