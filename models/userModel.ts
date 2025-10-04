@@ -10,6 +10,11 @@ export interface UserModel extends Document {
   avatar?: string;
   program?: "bsit" | "bsba";
   role: "admin" | "coordinator" | "student";
+  metadata?: {
+    company?: Schema.Types.ObjectId;
+    deploymentDate?: Date;
+    status?: "scheduled" | "deployed" | "completed";
+  };
 }
 
 const UserSchema = new Schema<UserModel>(
@@ -47,6 +52,20 @@ const UserSchema = new Schema<UserModel>(
       enum: ["admin", "coordinator", "student"],
       default: "student",
       required: true,
+    },
+    metadata: {
+      company: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Company",
+      },
+      deploymentDate: {
+        type: Date,
+      },
+      status: {
+        type: String,
+        enum: ["scheduled", "deployed", "completed"],
+        default: "scheduled",
+      },
     },
   },
   { timestamps: true }

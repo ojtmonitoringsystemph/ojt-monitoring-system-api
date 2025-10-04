@@ -1,7 +1,7 @@
 import { FilterQuery } from "mongoose";
 import { AppError } from "../middleware/errorHandler";
 import { DocumentsModel } from "../models/documentModel";
-import { DocumentsRepository } from "../repositories/documentRespository";
+import { DocumentsRepository } from "../repositories/documentRepository";
 
 export class DocumentsService {
   private documentRepository: DocumentsRepository;
