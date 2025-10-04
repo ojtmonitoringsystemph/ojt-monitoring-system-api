@@ -114,4 +114,83 @@ export class UserController {
       next(error);
     }
   }
+
+  @route.post("/assign-company")
+  assignToCompany = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
+      const { userId, companyId, deploymentDate, status } = req.body;
+
+      if (!userId || !companyId) {
+        throw new AppError("User ID and Company ID are required", 400);
+      }
+
+      const user = await this.userService.assignUserToCompany(
+        userId,
+        companyId,
+        deploymentDate,
+        status
+      );
+      res.json({
+        message: "User successfully assigned to company",
+        user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  @route.post("/unassign-company")
+  unassignFromCompany = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
+      const { userId } = req.body;
+
+      if (!userId) {
+        throw new AppError("User ID is required", 400);
+      }
+
+      const user = await this.userService.unassignUserFromCompany(userId);
+      res.json({
+        message: "User successfully unassigned from company",
+        user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  @route.patch("/deployment-status")
+  updateDeploymentStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
+      const { userId, status } = req.body;
+
+      if (!userId || !status) {
+        throw new AppError("User ID and status are required", 400);
+      }
+
+      if (!["scheduled", "deployed", "completed"].includes(status)) {
+        throw new AppError("Invalid status. Must be 'scheduled', 'deployed', or 'completed'", 400);
+      }
+
+      const user = await this.userService.updateUserDeploymentStatus(userId, status);
+      res.json({
+        message: "User deployment status updated successfully",
+        user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -84,4 +84,115 @@ export class UserService {
     }
     return user;
   }
+
+  async assignUserToCompany(
+    userId: string,
+    companyId: string,
+    deploymentDate?: Date,
+    status?: "scheduled" | "deployed" | "completed"
+  ): Promise<UserModel | null> {
+    // Check if user exists
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    // Check if user is a student
+    if (user.role !== "student") {
+      throw new AppError("Only students can be assigned to companies", 400);
+    }
+
+    // Check if user is already assigned to a company
+    if (user.metadata?.company) {
+      throw new AppError("User is already assigned to a company", 400);
+    }
+
+    // Update user with company assignment
+    const updateData: Partial<UserModel> = {
+      metadata: {
+        ...user.metadata,
+        company: companyId as any,
+        deploymentDate: deploymentDate || new Date(),
+        status: status || "scheduled",
+      },
+    };
+
+    const updatedUser = await this.userRepository.updateUser(userId, updateData);
+    if (!updatedUser) {
+      throw new AppError("Failed to assign user to company", 500);
+    }
+
+    return updatedUser;
+  }
+
+  async unassignUserFromCompany(userId: string): Promise<UserModel | null> {
+    // Check if user exists
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    // Check if user is a student
+    if (user.role !== "student") {
+      throw new AppError("Only students can be unassigned from companies", 400);
+    }
+
+    // Check if user is assigned to a company
+    if (!user.metadata?.company) {
+      throw new AppError("User is not assigned to any company", 400);
+    }
+
+    // Update user to remove company assignment
+    const updateData: Partial<UserModel> = {
+      metadata: {
+        ...user.metadata,
+        company: undefined,
+        deploymentDate: undefined,
+        status: "scheduled",
+      },
+    };
+
+    const updatedUser = await this.userRepository.updateUser(userId, updateData);
+    if (!updatedUser) {
+      throw new AppError("Failed to unassign user from company", 500);
+    }
+
+    return updatedUser;
+  }
+
+  async updateUserDeploymentStatus(
+    userId: string,
+    status: "scheduled" | "deployed" | "completed"
+  ): Promise<UserModel | null> {
+    // Check if user exists
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    // Check if user is a student
+    if (user.role !== "student") {
+      throw new AppError("Only student deployment status can be updated", 400);
+    }
+
+    // Check if user is assigned to a company
+    if (!user.metadata?.company) {
+      throw new AppError("User is not assigned to any company", 400);
+    }
+
+    // Update user deployment status
+    const updateData: Partial<UserModel> = {
+      metadata: {
+        ...user.metadata,
+        status: status,
+      },
+    };
+
+    const updatedUser = await this.userRepository.updateUser(userId, updateData);
+    if (!updatedUser) {
+      throw new AppError("Failed to update user deployment status", 500);
+    }
+
+    return updatedUser;
+  }
 }
