@@ -1,6 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-// Purpose: Define the user model schema
 export interface CompanyModel extends Document {
   name: string;
   address: string;

@@ -6,6 +6,7 @@ import { AuthController } from "../controllers/authController";
 import { DocumentsController } from "../controllers/documentController";
 import { TaskController } from "../controllers/taskController";
 import { CompanyController } from "../controllers/companyController";
+import { AnnouncementController } from "../controllers/announcementController";
 
 // Extract all routes from the controllers.
 export const routes = extract(
@@ -14,5 +15,6 @@ export const routes = extract(
   AuthController,
   DocumentsController,
   TaskController,
-  CompanyController
+  CompanyController,
+  AnnouncementController
 );
