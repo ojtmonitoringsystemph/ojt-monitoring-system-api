@@ -19,11 +19,6 @@ export class AuthController {
       const { firstName, lastName, middleName, role, email, password, program } =
         req.body as RegisterData;
 
-      // Validate user student by default cannot create a user role is admin and coordinator
-      if (role === "admin" || role === "coordinator") {
-        throw new AppError("Students cannot create admin or coordinator accounts", 403);
-      }
-
       const result = await this.authService.register({
         firstName,
         lastName,

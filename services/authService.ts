@@ -95,6 +95,11 @@ export class AuthService {
       throw new AppError("Invalid email or password", 401);
     }
 
+    // Verify role matches
+    if (user.role !== role) {
+      throw new AppError("Invalid role for this user", 401);
+    }
+
     // Generate tokens
     const { accessToken, refreshToken } = await generateTokens({
       id: user._id.toString(),
