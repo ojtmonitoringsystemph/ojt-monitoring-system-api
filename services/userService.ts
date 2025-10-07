@@ -88,6 +88,7 @@ export class UserService {
   async assignUserToCompany(
     userId: string,
     companyId: string,
+    coordinatorId: string,
     deploymentDate?: Date,
     status?: "scheduled" | "deployed" | "completed"
   ): Promise<UserModel | null> {
@@ -112,6 +113,7 @@ export class UserService {
       metadata: {
         ...user.metadata,
         company: companyId as any,
+        coordinator: coordinatorId as any,
         deploymentDate: deploymentDate || new Date(),
         status: status || "scheduled",
       },
@@ -194,5 +196,15 @@ export class UserService {
     }
 
     return updatedUser;
+  }
+
+  async getUserDashboard(userId: string, userRole: string): Promise<any> {
+    const dashboardData = await this.userRepository.userDashboard(userId, userRole);
+
+    if (!dashboardData || dashboardData.length === 0) {
+      throw new AppError("Dashboard data not found", 404);
+    }
+
+    return dashboardData[0];
   }
 }

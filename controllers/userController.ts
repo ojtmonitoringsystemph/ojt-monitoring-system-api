@@ -1,11 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { route } from "express-extract-routes";
 import { requireAuthentication } from "../helpers/auth";
+import { TokenPayload } from "../helpers/interface";
 import { AppError } from "../middleware/errorHandler";
 import { upload } from "../middleware/multer";
 import { UseMiddleware } from "../middleware/useMiddleware";
 import { CloudinaryService } from "../services/cloudinaryService";
 import { UserService } from "../services/userService";
+
+interface AuthenticatedRequest extends Request {
+  user?: TokenPayload;
+}
 
 // Purpose: This controller class is responsible for handling the user related requests.
 @route("/user")
@@ -121,15 +126,16 @@ export class UserController {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
-      const { userId, companyId, deploymentDate, status } = req.body;
+      const { userId, companyId, deploymentDate, status, coordinatorId } = req.body;
 
-      if (!userId || !companyId) {
-        throw new AppError("User ID and Company ID are required", 400);
+      if (!userId || !companyId || !coordinatorId) {
+        throw new AppError("User ID and Company ID and Coordinator ID are required", 400);
       }
 
       const user = await this.userService.assignUserToCompany(
         userId,
         companyId,
+        coordinatorId,
         deploymentDate,
         status
       );
@@ -188,6 +194,31 @@ export class UserController {
       res.json({
         message: "User deployment status updated successfully",
         user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  @route.get("/dashboard")
+  getDashboard = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
+      // Get user info from the authenticated request
+      if (!req.user || !req.user.id || !req.user.role) {
+        throw new AppError("User authentication information is missing", 401);
+      }
+
+      const dashboardData = await this.userService.getUserDashboard(req.user.id, req.user.role);
+      res.json({
+        message: "Dashboard data retrieved successfully",
+        dashboard: dashboardData,
       });
     } catch (error) {
       next(error);

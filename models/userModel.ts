@@ -12,6 +12,7 @@ export interface UserModel extends Document {
   role: "admin" | "coordinator" | "student";
   metadata?: {
     company?: Schema.Types.ObjectId;
+    coordinator?: Schema.Types.ObjectId;
     deploymentDate?: Date;
     status?: "scheduled" | "deployed" | "completed";
   };
@@ -57,6 +58,10 @@ const UserSchema = new Schema<UserModel>(
       company: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Company",
+      },
+      coordinator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
       },
       deploymentDate: {
         type: Date,

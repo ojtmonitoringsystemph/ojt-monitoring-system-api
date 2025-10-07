@@ -1,5 +1,6 @@
 import { User, UserModel } from "../models/userModel";
 import { FilterQuery, UpdateQuery } from "mongoose";
+import mongoose from "mongoose";
 
 // Purpose: This file is responsible for handling all the database operations related to the user model.
 export class UserRepository {
@@ -55,5 +56,206 @@ export class UserRepository {
 
     // If multi is not specified or is false, it updates the first user in the database that matches the query with the update. It returns the updated user.
     return User.findOneAndUpdate(query, update, { new: true });
+  }
+
+  async userDashboard(userId: string, userRole: string): Promise<any> {
+    return await User.aggregate([
+      {
+        $facet: {
+          // For Student Dashboard
+          studentDashboard: [
+            {
+              $match: { _id: new mongoose.Types.ObjectId(userId), role: "student" },
+            },
+            {
+              $lookup: {
+                from: "announcements",
+                pipeline: [],
+                as: "announcements",
+              },
+            },
+            {
+              $lookup: {
+                from: "tasks",
+                localField: "_id",
+                foreignField: "assignedTo",
+                as: "tasks",
+              },
+            },
+            {
+              $project: {
+                totalAnnouncements: { $size: "$announcements" },
+                totalTasks: { $size: "$tasks" },
+                userRole: "$role",
+              },
+            },
+          ],
+
+          // For Coordinator Dashboard
+          coordinatorDashboard: [
+            {
+              $match: { _id: new mongoose.Types.ObjectId(userId), role: "coordinator" },
+            },
+            {
+              $lookup: {
+                from: "announcements",
+                pipeline: [],
+                as: "announcements",
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "_id",
+                foreignField: "metadata.coordinator",
+                as: "studentsHandled",
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                pipeline: [
+                  {
+                    $match: {
+                      role: "student",
+                      "metadata.coordinator": new mongoose.Types.ObjectId(userId),
+                    },
+                  },
+                  {
+                    $lookup: {
+                      from: "companies",
+                      localField: "metadata.company",
+                      foreignField: "_id",
+                      as: "company",
+                    },
+                  },
+                  { $unwind: { path: "$company", preserveNullAndEmptyArrays: true } },
+                ],
+                as: "studentsWithCompanies",
+              },
+            },
+            {
+              $project: {
+                totalAnnouncements: { $size: "$announcements" },
+                totalStudentsHandled: { $size: "$studentsHandled" },
+                bsitStudents: {
+                  $size: {
+                    $filter: {
+                      input: "$studentsHandled",
+                      cond: { $eq: ["$$this.program", "bsit"] },
+                    },
+                  },
+                },
+                bsbaStudents: {
+                  $size: {
+                    $filter: {
+                      input: "$studentsHandled",
+                      cond: { $eq: ["$$this.program", "bsba"] },
+                    },
+                  },
+                },
+                companiesWithStudents: {
+                  $size: {
+                    $setUnion: [
+                      {
+                        $map: {
+                          input: {
+                            $filter: {
+                              input: "$studentsWithCompanies",
+                              cond: { $ne: ["$$this.company", null] },
+                            },
+                          },
+                          in: "$$this.company._id",
+                        },
+                      },
+                      [],
+                    ],
+                  },
+                },
+                userRole: "$role",
+              },
+            },
+          ],
+
+          // For Admin Dashboard
+          adminDashboard: [
+            {
+              $match: { _id: new mongoose.Types.ObjectId(userId), role: "admin" },
+            },
+            {
+              $lookup: {
+                from: "users",
+                pipeline: [{ $match: { role: "student" } }],
+                as: "allStudents",
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                pipeline: [{ $match: { role: "coordinator" } }],
+                as: "allCoordinators",
+              },
+            },
+            {
+              $lookup: {
+                from: "companies",
+                pipeline: [],
+                as: "allCompanies",
+              },
+            },
+            {
+              $project: {
+                totalStudents: { $size: "$allStudents" },
+                bsitStudents: {
+                  $size: {
+                    $filter: {
+                      input: "$allStudents",
+                      cond: { $eq: ["$$this.program", "bsit"] },
+                    },
+                  },
+                },
+                bsbaStudents: {
+                  $size: {
+                    $filter: {
+                      input: "$allStudents",
+                      cond: { $eq: ["$$this.program", "bsba"] },
+                    },
+                  },
+                },
+                totalCoordinators: { $size: "$allCoordinators" },
+                totalCompanies: { $size: "$allCompanies" },
+                userRole: "$role",
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          dashboard: {
+            $switch: {
+              branches: [
+                {
+                  case: { $eq: [userRole, "student"] },
+                  then: { $arrayElemAt: ["$studentDashboard", 0] },
+                },
+                {
+                  case: { $eq: [userRole, "coordinator"] },
+                  then: { $arrayElemAt: ["$coordinatorDashboard", 0] },
+                },
+                {
+                  case: { $eq: [userRole, "admin"] },
+                  then: { $arrayElemAt: ["$adminDashboard", 0] },
+                },
+              ],
+              default: null,
+            },
+          },
+        },
+      },
+      {
+        $replaceRoot: { newRoot: "$dashboard" },
+      },
+    ]);
   }
 }
