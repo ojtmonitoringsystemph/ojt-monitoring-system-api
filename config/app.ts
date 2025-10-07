@@ -6,10 +6,16 @@ import { errorHandler, notFound } from "../middleware/errorHandler";
 import { routes } from "../routes";
 import { createController } from "express-extract-routes";
 import { setupSwagger } from "./swagger";
+import { Server as SocketIOServer } from "socket.io";
 
 // Create an express application
-export const createApp = (): express.Application => {
+export const createApp = (io?: SocketIOServer): express.Application => {
   const app = express();
+
+  // Make the "io" accessible globally
+  if (io) {
+    app.set("io", io);
+  }
 
   // Middleware
   app.use(helmet());

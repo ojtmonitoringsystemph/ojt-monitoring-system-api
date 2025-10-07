@@ -53,6 +53,7 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 - `company-management.md` - Company registration and management
 - `user-management.md` - User creation and management
 - `student-assignment.md` - Student-to-company assignment system
+- `real-time-messaging.md` - Real-time messaging system with Socket.IO
 - `api-reference.md` - Complete API endpoint reference
 - `data-models.md` - Database schema and models
 - `authentication.md` - Authentication and authorization
@@ -78,6 +79,13 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 - Deployment date tracking
 - Status management (scheduled, deployed, completed)
 
+### Real-Time Messaging
+
+- Instant messaging between users
+- Read receipts and message tracking
+- Socket.IO-powered real-time communication
+- Message search and management
+
 ## API Endpoints
 
 ### Base URL
@@ -91,6 +99,7 @@ http://localhost:3000/api
 - `/user` - User management operations
 - `/company` - Company management operations
 - `/auth` - Authentication endpoints
+- `/message` - Real-time messaging operations
 - `/tasks` - Task management (if applicable)
 - `/documents` - Document management (if applicable)
 
