@@ -15,7 +15,7 @@ export const createApp = (io?: SocketIOServer): express.Application => {
   if (io) {
     app.set("io", io);
   }
-  const allowedOrigins = ["http://localhost:5173"];
+  const allowedOrigins = ["http://localhost:5173", "https://ojt-ms-app.web.app/", "https://ojt-ms-app.web.app"];
 
   app.use(
     cors({
