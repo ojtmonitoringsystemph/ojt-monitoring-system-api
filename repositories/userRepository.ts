@@ -12,10 +12,16 @@ export class UserRepository {
   // This method returns all the user in the database.
   async getUsers(role?: string): Promise<UserModel[]> {
     if (role) {
-      return User.find({ role: `${role}` });
+      return await User.find({ role }).populate([
+        { path: "metadata.company" },
+        { path: "metadata.coordinator" },
+      ]);
     }
 
-    return User.find();
+    return await User.find().populate([
+      { path: "metadata.company" },
+      { path: "metadata.coordinator" },
+    ]);
   }
 
   // This method creates a bew user in the database.
@@ -24,7 +30,10 @@ export class UserRepository {
   }
 
   // This method updates a user in the database.
-  async updateUser(id: string, userData: Partial<UserModel>): Promise<UserModel | null> {
+  async updateUser(
+    id: string,
+    userData: Partial<UserModel>
+  ): Promise<UserModel | null> {
     return User.findByIdAndUpdate(id, userData, { new: true });
   }
 
@@ -65,7 +74,10 @@ export class UserRepository {
           // For Student Dashboard
           studentDashboard: [
             {
-              $match: { _id: new mongoose.Types.ObjectId(userId), role: "student" },
+              $match: {
+                _id: new mongoose.Types.ObjectId(userId),
+                role: "student",
+              },
             },
             {
               $lookup: {
@@ -94,7 +106,10 @@ export class UserRepository {
           // For Coordinator Dashboard
           coordinatorDashboard: [
             {
-              $match: { _id: new mongoose.Types.ObjectId(userId), role: "coordinator" },
+              $match: {
+                _id: new mongoose.Types.ObjectId(userId),
+                role: "coordinator",
+              },
             },
             {
               $lookup: {
@@ -118,7 +133,9 @@ export class UserRepository {
                   {
                     $match: {
                       role: "student",
-                      "metadata.coordinator": new mongoose.Types.ObjectId(userId),
+                      "metadata.coordinator": new mongoose.Types.ObjectId(
+                        userId
+                      ),
                     },
                   },
                   {
@@ -129,7 +146,12 @@ export class UserRepository {
                       as: "company",
                     },
                   },
-                  { $unwind: { path: "$company", preserveNullAndEmptyArrays: true } },
+                  {
+                    $unwind: {
+                      path: "$company",
+                      preserveNullAndEmptyArrays: true,
+                    },
+                  },
                 ],
                 as: "studentsWithCompanies",
               },
@@ -180,7 +202,10 @@ export class UserRepository {
           // For Admin Dashboard
           adminDashboard: [
             {
-              $match: { _id: new mongoose.Types.ObjectId(userId), role: "admin" },
+              $match: {
+                _id: new mongoose.Types.ObjectId(userId),
+                role: "admin",
+              },
             },
             {
               $lookup: {

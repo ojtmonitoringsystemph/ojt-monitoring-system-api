@@ -16,7 +16,10 @@ const startServer = async () => {
     const server = http.createServer();
     const port = process.env.PORT || config.PORT;
     const io = new SocketIOServer(server, {
-      cors: { origin: "*" },
+      cors: {
+        origin: "https://ojt-ms-app.web.app/",
+        credentials: true,
+      },
     });
 
     // Create app with socket.io instance

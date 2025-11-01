@@ -1,4 +1,4 @@
-import { Application } from "express";
+import { Application, Request, Response, NextFunction } from "express";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { SwaggerTheme, SwaggerThemeNameEnum } from "swagger-themes";
@@ -32,7 +32,6 @@ const options = {
       },
     ],
   },
-  // Path to the API docs
   apis: ["./controllers/*.ts", "./routes/*.ts"],
 };
 
@@ -40,6 +39,23 @@ const swaggerSpec = swaggerJSDoc(options);
 const theme = new SwaggerTheme();
 
 export const setupSwagger = (app: Application) => {
+  const allowedOrigin = "http://localhost:5173";
+
+  // ✅ Add explicit CORS middleware for Swagger docs
+  app.use("/api/docs", (req: Request, res: Response, next: NextFunction) => {
+    res.header("Access-Control-Allow-Origin", allowedOrigin);
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    );
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(204);
+    }
+    next();
+  });
+
   app.use(
     "/api/docs",
     swaggerUi.serve,

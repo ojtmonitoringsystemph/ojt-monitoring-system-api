@@ -1,10 +1,20 @@
 import jwt from "jsonwebtoken";
 import { config } from "../config/constants";
-import { AuthResponse, LoginCredentials, RegisterData, TokenPayload } from "../helpers/interface";
+import {
+  AuthResponse,
+  LoginCredentials,
+  RegisterData,
+  TokenPayload,
+} from "../helpers/interface";
 import { AppError } from "../middleware/errorHandler";
 import { UserModel } from "../models/userModel";
 import { UserRepository } from "../repositories/userRepository";
-import { hashPassword, generateTokens, sanitizeUser, comparePasswords } from "../helpers/auth";
+import {
+  hashPassword,
+  generateTokens,
+  sanitizeUser,
+  comparePasswords,
+} from "../helpers/auth";
 
 // Purpose: This service class is responsible for handling authentication-related business logic including user registration, login, token generation, and password management.
 export class AuthService {
@@ -18,7 +28,8 @@ export class AuthService {
    * Register a new user
    */
   async register(registerData: RegisterData): Promise<AuthResponse> {
-    const { firstName, lastName, middleName, email, password, role, program } = registerData;
+    const { firstName, lastName, middleName, email, password, role, program } =
+      registerData;
 
     // Basic validation
     if (!firstName || !lastName || !email || !password) {
@@ -96,8 +107,8 @@ export class AuthService {
     }
 
     // Verify role matches
-    if (user.role !== role) {
-      throw new AppError("Invalid role for this user", 401);
+    if (!["admin", "student", "coordinator"].includes(user.role)) {
+      throw new Error("Invalid role for this user");
     }
 
     // Generate tokens
@@ -121,7 +132,9 @@ export class AuthService {
   /**
    * Refresh access token
    */
-  async refreshToken(token: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(
+    token: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const decoded = jwt.verify(token, config.JWT.SECRET) as TokenPayload;
 
@@ -183,7 +196,10 @@ export class AuthService {
     }
 
     // Verify current password
-    const isValidPassword = await comparePasswords(currentPassword, user.password);
+    const isValidPassword = await comparePasswords(
+      currentPassword,
+      user.password
+    );
     if (!isValidPassword) {
       throw new AppError("Current password is incorrect", 400);
     }
