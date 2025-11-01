@@ -10,18 +10,8 @@ export class UserRepository {
   }
 
   // This method returns all the user in the database.
-  async getUsers(role?: string): Promise<UserModel[]> {
-    if (role) {
-      return await User.find({ role }).populate([
-        { path: "metadata.company" },
-        { path: "metadata.coordinator" },
-      ]);
-    }
-
-    return await User.find().populate([
-      { path: "metadata.company" },
-      { path: "metadata.coordinator" },
-    ]);
+  async getUsers(): Promise<UserModel[]> {
+    return await User.find().populate([{ path: "metadata.company" }, { path: "metadata.coordinator" }]);
   }
 
   // This method creates a bew user in the database.
@@ -30,10 +20,7 @@ export class UserRepository {
   }
 
   // This method updates a user in the database.
-  async updateUser(
-    id: string,
-    userData: Partial<UserModel>
-  ): Promise<UserModel | null> {
+  async updateUser(id: string, userData: Partial<UserModel>): Promise<UserModel | null> {
     return User.findByIdAndUpdate(id, userData, { new: true });
   }
 
@@ -42,11 +29,35 @@ export class UserRepository {
     return User.findByIdAndDelete(id);
   }
 
-  // This method searches for a user in the database that matches the query object.
-  async searchUser(query: FilterQuery<UserModel>): Promise<UserModel | null> {
-    return User.findOne(query);
+  // This method searches for user(s) in the database that match the query object.
+  async searchUser(
+    query: FilterQuery<UserModel>,
+    options?: { multiple?: boolean; populate?: boolean }
+  ): Promise<UserModel | UserModel[] | null> {
+    const { multiple = false, populate = false } = options || {};
+
+    if (multiple) {
+      const populateOptions = populate ? [{ path: "metadata.company" }, { path: "metadata.coordinator" }] : [];
+      const results = await User.find(query).populate(populateOptions);
+      return results; // This will be UserModel[]
+    } else {
+      const result = await User.findOne(query);
+      return result; // This will be UserModel | null
+    }
   }
 
+  // Method overloads for better type safety
+  async searchAndUpdate(query: FilterQuery<UserModel>): Promise<UserModel | null>;
+  async searchAndUpdate(
+    query: FilterQuery<UserModel>,
+    update: UpdateQuery<UserModel>,
+    options: { multi: true }
+  ): Promise<{ modifiedCount: number }>;
+  async searchAndUpdate(
+    query: FilterQuery<UserModel>,
+    update: UpdateQuery<UserModel>,
+    options?: { multi?: false }
+  ): Promise<UserModel | null>;
   async searchAndUpdate(
     query: FilterQuery<UserModel>,
     update?: UpdateQuery<UserModel>,
@@ -133,9 +144,7 @@ export class UserRepository {
                   {
                     $match: {
                       role: "student",
-                      "metadata.coordinator": new mongoose.Types.ObjectId(
-                        userId
-                      ),
+                      "metadata.coordinator": new mongoose.Types.ObjectId(userId),
                     },
                   },
                   {

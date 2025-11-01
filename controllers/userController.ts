@@ -49,8 +49,7 @@ export class UserController {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
-      const role = req.query.role as string | undefined;
-      const users = await this.userService.getUsers(role);
+      const users = await this.userService.getUsers();
       res.json(users);
     } catch (error) {
       next(error);
@@ -89,8 +88,8 @@ export class UserController {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
-      const user = await this.userService.searchUser(req.body);
-      res.json(user);
+      const users = await this.userService.searchUser(req.body, { multiple: true });
+      res.json(users);
     } catch (error) {
       next(error);
     }
@@ -132,13 +131,7 @@ export class UserController {
         throw new AppError("User ID and Company ID and Coordinator ID are required", 400);
       }
 
-      const user = await this.userService.assignUserToCompany(
-        userId,
-        companyId,
-        coordinatorId,
-        deploymentDate,
-        status
-      );
+      const user = await this.userService.assignUserToCompany(userId, companyId, coordinatorId, deploymentDate, status);
       res.json({
         message: "User successfully assigned to company",
         user,
@@ -171,11 +164,7 @@ export class UserController {
   };
 
   @route.patch("/deployment-status")
-  updateDeploymentStatus = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  updateDeploymentStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
@@ -201,11 +190,7 @@ export class UserController {
   };
 
   @route.get("/dashboard")
-  getDashboard = async (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  getDashboard = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);

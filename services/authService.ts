@@ -95,7 +95,7 @@ export class AuthService {
     }
 
     // Find user
-    const user = await this.userRepository.searchUser({ email });
+    const user = await this.userRepository.searchAndUpdate({ email: email });
     if (!user) {
       throw new AppError("Invalid email or password", 401);
     }

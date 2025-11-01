@@ -19,8 +19,8 @@ export class UserService {
     return user;
   }
 
-  async getUsers(role?: string): Promise<UserModel[]> {
-    return this.userRepository.getUsers(role);
+  async getUsers(): Promise<UserModel[]> {
+    return this.userRepository.getUsers();
   }
 
   async createUser(userData: Partial<UserModel>) {
@@ -67,7 +67,7 @@ export class UserService {
     return user;
   }
 
-  async searchUser(query: FilterQuery<UserModel>): Promise<UserModel | null> {
+  async searchUser(query: FilterQuery<UserModel>, options?: { multiple?: boolean }): Promise<UserModel | UserModel[]> {
     const caseInsensitiveQuery = Object.keys(query).reduce((acc, key) => {
       const value = query[key];
       if (typeof value === "string") {
@@ -78,11 +78,21 @@ export class UserService {
       return acc;
     }, {} as FilterQuery<UserModel>);
 
-    const user = await this.userRepository.searchUser(caseInsensitiveQuery);
-    if (!user) {
-      throw new AppError("User not found", 404);
+    const { multiple = false } = options || {};
+
+    if (multiple) {
+      const users = await this.userRepository.searchUser(caseInsensitiveQuery, { multiple: true, populate: true });
+      if (!users || (Array.isArray(users) && users.length === 0)) {
+        throw new AppError("No users found", 404);
+      }
+      return users as UserModel[];
+    } else {
+      const user = await this.userRepository.searchUser(caseInsensitiveQuery);
+      if (!user || Array.isArray(user)) {
+        throw new AppError("User not found", 404);
+      }
+      return user;
     }
-    return user;
   }
 
   async assignUserToCompany(
