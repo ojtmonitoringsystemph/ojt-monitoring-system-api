@@ -22,6 +22,13 @@ export class TaskService {
     return this.taskRepository.getTasks();
   }
 
+  async getTasksByStudentId(studentId: string): Promise<TaskModel[]> {
+    if (!studentId) {
+      throw new AppError("Student ID is required", 400);
+    }
+    return this.taskRepository.getTasksByStudentId(studentId);
+  }
+
   async createTask(data: Partial<TaskModel>) {
     if (!data) {
       throw new AppError("Tasks data are required", 400);

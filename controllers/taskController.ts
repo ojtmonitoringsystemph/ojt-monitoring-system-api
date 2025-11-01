@@ -24,11 +24,7 @@ export class TaskController {
 
   @route.post("/")
   @UseMiddleware(upload.array("files", 10))
-  async createAndUploadFiles(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async createAndUploadFiles(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
@@ -83,6 +79,19 @@ export class TaskController {
 
       const task = await this.taskService.getTasks();
       res.json(task);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  @route.get("/student/:studentId")
+  getTasksByStudentId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
+      const tasks = await this.taskService.getTasksByStudentId(req.params.studentId);
+      res.json(tasks);
     } catch (error) {
       next(error);
     }
@@ -153,11 +162,7 @@ export class TaskController {
   }
 
   @route.post("/remove-files/:id")
-  async removeFilesToSubmissionProof(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async removeFilesToSubmissionProof(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);

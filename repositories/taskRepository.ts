@@ -15,16 +15,18 @@ export class TaskRepository {
       .populate("assignedTo", "firstName lastName email"); // replace with the fields you want from User
   }
 
-  // This method creates a bew task in the database.
+  // This method returns all tasks for a specific student.
+  async getTasksByStudentId(studentId: string): Promise<TaskModel[]> {
+    return Task.find({ assignedTo: studentId });
+  }
+
+  // This method creates a new task in the database.
   async createTask(data: Partial<TaskModel>): Promise<TaskModel> {
     return Task.create(data);
   }
 
   // This method updates a task in the database.
-  async updateTask(
-    id: string,
-    data: Partial<TaskModel>
-  ): Promise<TaskModel | null> {
+  async updateTask(id: string, data: Partial<TaskModel>): Promise<TaskModel | null> {
     return Task.findByIdAndUpdate(id, data, { new: true });
   }
 
@@ -39,27 +41,13 @@ export class TaskRepository {
   }
 
   // This method adds file URLs to the task's documents array (prevents duplicates)
-  async addFilesToSubmissionProof(
-    id: string,
-    documents: string[]
-  ): Promise<TaskModel | null> {
-    return Task.findByIdAndUpdate(
-      id,
-      { $addToSet: { submissionProofUrl: { $each: documents } } },
-      { new: true }
-    );
+  async addFilesToSubmissionProof(id: string, documents: string[]): Promise<TaskModel | null> {
+    return Task.findByIdAndUpdate(id, { $addToSet: { submissionProofUrl: { $each: documents } } }, { new: true });
   }
 
   // This method removes specific file URLs from the task's documents array
-  async removeFilesToSubmissionProof(
-    id: string,
-    documents: string[]
-  ): Promise<TaskModel | null> {
-    return Task.findByIdAndUpdate(
-      id,
-      { $pullAll: { submissionProofUrl: documents } },
-      { new: true }
-    );
+  async removeFilesToSubmissionProof(id: string, documents: string[]): Promise<TaskModel | null> {
+    return Task.findByIdAndUpdate(id, { $pullAll: { submissionProofUrl: documents } }, { new: true });
   }
 
   async searchAndUpdate(
