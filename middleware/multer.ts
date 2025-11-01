@@ -14,6 +14,10 @@ const fileFilter = (_req: Request, file: Express.Multer.File, cb: Function) => {
     "application/vnd.ms-excel",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "text/plain",
+    "image/jpeg",
+    "image/png",
+    "application/xml", // <-- add this
+    "text/xml",
   ];
 
   const isAllowed = allowedTypes.some(

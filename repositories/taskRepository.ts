@@ -10,7 +10,9 @@ export class TaskRepository {
 
   // This method returns all the task in the database.
   async getTasks(): Promise<TaskModel[]> {
-    return Task.find();
+    return Task.find()
+      .populate("createdBy", "firstName lastName email") // replace with the fields you want from User
+      .populate("assignedTo", "firstName lastName email"); // replace with the fields you want from User
   }
 
   // This method creates a bew task in the database.
@@ -19,7 +21,10 @@ export class TaskRepository {
   }
 
   // This method updates a task in the database.
-  async updateTask(id: string, data: Partial<TaskModel>): Promise<TaskModel | null> {
+  async updateTask(
+    id: string,
+    data: Partial<TaskModel>
+  ): Promise<TaskModel | null> {
     return Task.findByIdAndUpdate(id, data, { new: true });
   }
 
@@ -34,7 +39,10 @@ export class TaskRepository {
   }
 
   // This method adds file URLs to the task's documents array (prevents duplicates)
-  async addFilesToSubmissionProof(id: string, documents: string[]): Promise<TaskModel | null> {
+  async addFilesToSubmissionProof(
+    id: string,
+    documents: string[]
+  ): Promise<TaskModel | null> {
     return Task.findByIdAndUpdate(
       id,
       { $addToSet: { submissionProofUrl: { $each: documents } } },
@@ -43,7 +51,10 @@ export class TaskRepository {
   }
 
   // This method removes specific file URLs from the task's documents array
-  async removeFilesToSubmissionProof(id: string, documents: string[]): Promise<TaskModel | null> {
+  async removeFilesToSubmissionProof(
+    id: string,
+    documents: string[]
+  ): Promise<TaskModel | null> {
     return Task.findByIdAndUpdate(
       id,
       { $pullAll: { submissionProofUrl: documents } },

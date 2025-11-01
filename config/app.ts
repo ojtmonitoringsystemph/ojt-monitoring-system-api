@@ -1,5 +1,5 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { errorHandler, notFound } from "../middleware/errorHandler";
@@ -8,7 +8,6 @@ import { createController } from "express-extract-routes";
 import { setupSwagger } from "./swagger";
 import { Server as SocketIOServer } from "socket.io";
 
-// Create an express application
 export const createApp = (io?: SocketIOServer): express.Application => {
   const app = express();
 
@@ -16,22 +15,32 @@ export const createApp = (io?: SocketIOServer): express.Application => {
   if (io) {
     app.set("io", io);
   }
+  const allowedOrigins = ["http://localhost:5173"];
+
+  app.use(
+    cors({
+      origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, origin);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      credentials: true, // <-- Important
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
 
   // Middleware
   app.use(helmet());
-  app.use(cors());
   app.use(morgan("dev"));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
   //Routes
   routes.forEach((route) => {
-    app[route.method](
-      //you can add prefix
-      `/api${route.path}`,
-      //add here the middlewares
-      createController(route) // generating routing
-    );
+    app[route.method](`/api${route.path}`, createController(route));
   });
 
   // Swagger setup
