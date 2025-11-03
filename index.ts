@@ -17,7 +17,7 @@ const startServer = async () => {
     const port = process.env.PORT || config.PORT;
     const io = new SocketIOServer(server, {
       cors: {
-        origin: "http://localhost:5173",
+        origin: "https://ojt-ms-app.web.app/",
         credentials: true,
       },
     });
