@@ -11,7 +11,10 @@ export class UserRepository {
 
   // This method returns all the user in the database.
   async getUsers(): Promise<UserModel[]> {
-    return await User.find().populate([{ path: "metadata.company" }, { path: "metadata.coordinator" }]);
+    return await User.find().populate([
+      { path: "metadata.company" },
+      { path: "metadata.coordinator" },
+    ]);
   }
 
   // This method creates a bew user in the database.
@@ -20,7 +23,10 @@ export class UserRepository {
   }
 
   // This method updates a user in the database.
-  async updateUser(id: string, userData: Partial<UserModel>): Promise<UserModel | null> {
+  async updateUser(
+    id: string,
+    userData: Partial<UserModel>
+  ): Promise<UserModel | null> {
     return User.findByIdAndUpdate(id, userData, { new: true });
   }
 
@@ -37,7 +43,9 @@ export class UserRepository {
     const { multiple = false, populate = false } = options || {};
 
     if (multiple) {
-      const populateOptions = populate ? [{ path: "metadata.company" }, { path: "metadata.coordinator" }] : [];
+      const populateOptions = populate
+        ? [{ path: "metadata.company" }, { path: "metadata.coordinator" }]
+        : [];
       const results = await User.find(query).populate(populateOptions);
       return results; // This will be UserModel[]
     } else {
@@ -47,7 +55,9 @@ export class UserRepository {
   }
 
   // Method overloads for better type safety
-  async searchAndUpdate(query: FilterQuery<UserModel>): Promise<UserModel | null>;
+  async searchAndUpdate(
+    query: FilterQuery<UserModel>
+  ): Promise<UserModel | null>;
   async searchAndUpdate(
     query: FilterQuery<UserModel>,
     update: UpdateQuery<UserModel>,
@@ -144,7 +154,9 @@ export class UserRepository {
                   {
                     $match: {
                       role: "student",
-                      "metadata.coordinator": new mongoose.Types.ObjectId(userId),
+                      "metadata.coordinator": new mongoose.Types.ObjectId(
+                        userId
+                      ),
                     },
                   },
                   {

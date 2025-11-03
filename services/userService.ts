@@ -33,7 +33,10 @@ export class UserService {
     }
 
     if (!userData.role) {
-      throw new AppError("Invalid role. Must be admin, coordinator, or student", 400);
+      throw new AppError(
+        "Invalid role. Must be admin, coordinator, or student",
+        400
+      );
     }
 
     const existingUserByEmail = await this.userRepository.searchAndUpdate({
@@ -52,7 +55,10 @@ export class UserService {
       throw new AppError("User ID is required", 400);
     }
 
-    const user = await this.userRepository.updateUser(updateData._id, updateData);
+    const user = await this.userRepository.updateUser(
+      updateData._id,
+      updateData
+    );
     if (!user) {
       throw new AppError("User not found", 404);
     }
@@ -67,7 +73,10 @@ export class UserService {
     return user;
   }
 
-  async searchUser(query: FilterQuery<UserModel>, options?: { multiple?: boolean }): Promise<UserModel | UserModel[]> {
+  async searchUser(
+    query: FilterQuery<UserModel>,
+    options?: { multiple?: boolean }
+  ): Promise<UserModel | UserModel[]> {
     const caseInsensitiveQuery = Object.keys(query).reduce((acc, key) => {
       const value = query[key];
       if (typeof value === "string") {
@@ -81,7 +90,10 @@ export class UserService {
     const { multiple = false } = options || {};
 
     if (multiple) {
-      const users = await this.userRepository.searchUser(caseInsensitiveQuery, { multiple: true, populate: true });
+      const users = await this.userRepository.searchUser(caseInsensitiveQuery, {
+        multiple: true,
+        populate: true,
+      });
       if (!users || (Array.isArray(users) && users.length === 0)) {
         throw new AppError("No users found", 404);
       }
@@ -129,7 +141,10 @@ export class UserService {
       },
     };
 
-    const updatedUser = await this.userRepository.updateUser(userId, updateData);
+    const updatedUser = await this.userRepository.updateUser(
+      userId,
+      updateData
+    );
     if (!updatedUser) {
       throw new AppError("Failed to assign user to company", 500);
     }
@@ -164,7 +179,10 @@ export class UserService {
       },
     };
 
-    const updatedUser = await this.userRepository.updateUser(userId, updateData);
+    const updatedUser = await this.userRepository.updateUser(
+      userId,
+      updateData
+    );
     if (!updatedUser) {
       throw new AppError("Failed to unassign user from company", 500);
     }
@@ -200,7 +218,10 @@ export class UserService {
       },
     };
 
-    const updatedUser = await this.userRepository.updateUser(userId, updateData);
+    const updatedUser = await this.userRepository.updateUser(
+      userId,
+      updateData
+    );
     if (!updatedUser) {
       throw new AppError("Failed to update user deployment status", 500);
     }
@@ -209,7 +230,10 @@ export class UserService {
   }
 
   async getUserDashboard(userId: string, userRole: string): Promise<any> {
-    const dashboardData = await this.userRepository.userDashboard(userId, userRole);
+    const dashboardData = await this.userRepository.userDashboard(
+      userId,
+      userRole
+    );
 
     if (!dashboardData || dashboardData.length === 0) {
       throw new AppError("Dashboard data not found", 404);
