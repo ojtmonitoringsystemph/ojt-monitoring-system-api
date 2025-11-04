@@ -3,62 +3,80 @@ import { FilterQuery, UpdateQuery } from "mongoose";
 
 // Purpose: This file is responsible for handling all the database operations related to the document model.
 export class DocumentsRepository {
-  // This method returns a document in the database that matches the id.
+  // Get a single document by id with student populated
   async getDocument(id: string): Promise<DocumentsModel | null> {
-    return Documents.findById(id);
+    return Documents.findById(id).populate("student");
   }
 
-  // This method returns all the document in the database.
+  // Get all documents with student populated
   async getDocuments(): Promise<DocumentsModel[]> {
-    return Documents.find();
+    return Documents.find().populate("student");
   }
 
-  // This method returns all documents for a specific student.
+  // Get all documents for a specific student
   async getDocumentsByStudentId(studentId: string): Promise<DocumentsModel[]> {
-    return Documents.find({ student: studentId });
+    return Documents.find({ student: studentId }).populate("student");
   }
 
-  // This method creates a bew document in the database.
+  // Create a new document (no need to populate on create)
   async createDocument(data: Partial<DocumentsModel>): Promise<DocumentsModel> {
     return Documents.create(data);
   }
 
-  // This method updates a document in the database.
-  async updateDocument(id: string, data: Partial<DocumentsModel>): Promise<DocumentsModel | null> {
-    return Documents.findByIdAndUpdate(id, data, { new: true });
+  // Update a document and return populated student
+  async updateDocument(
+    id: string,
+    data: Partial<DocumentsModel>
+  ): Promise<DocumentsModel | null> {
+    return Documents.findByIdAndUpdate(id, data, { new: true }).populate(
+      "student"
+    );
   }
 
-  // This method deletes a document from the database.
+  // Delete a document (no populate needed)
   async deleteDocument(id: string): Promise<DocumentsModel | null> {
     return Documents.findByIdAndDelete(id);
   }
 
-  // This method searches for a document in the database that matches the query object.
-  async searchDocument(query: FilterQuery<DocumentsModel>): Promise<DocumentsModel | null> {
-    return Documents.findOne(query);
+  // Search one document and populate student
+  async searchDocument(
+    query: FilterQuery<DocumentsModel>
+  ): Promise<DocumentsModel | null> {
+    return Documents.findOne(query).populate("student");
   }
 
-  // This method adds file URLs to the document's documents array (prevents duplicates)
-  async addFilesToDocument(id: string, documents: string[]): Promise<DocumentsModel | null> {
+  // Add files to a document and return populated student
+  async addFilesToDocument(
+    id: string,
+    documents: string[]
+  ): Promise<DocumentsModel | null> {
     return Documents.findByIdAndUpdate(
       id,
       { $addToSet: { documents: { $each: documents } } },
       { new: true }
-    );
+    ).populate("student");
   }
 
-  // This method removes specific file URLs from the document's documents array
-  async removeFilesFromDocument(id: string, documents: string[]): Promise<DocumentsModel | null> {
-    return Documents.findByIdAndUpdate(id, { $pullAll: { documents: documents } }, { new: true });
+  // Remove files from a document and return populated student
+  async removeFilesFromDocument(
+    id: string,
+    documents: string[]
+  ): Promise<DocumentsModel | null> {
+    return Documents.findByIdAndUpdate(
+      id,
+      { $pullAll: { documents: documents } },
+      { new: true }
+    ).populate("student");
   }
 
+  // Search and update with optional multi-update
   async searchAndUpdate(
     query: FilterQuery<DocumentsModel>,
     update?: UpdateQuery<DocumentsModel>,
     options?: { multi?: boolean }
   ): Promise<DocumentsModel | null | { modifiedCount: number }> {
     if (!update) {
-      return Documents.findOne(query);
+      return Documents.findOne(query).populate("student");
     }
 
     if (options?.multi) {
@@ -66,6 +84,8 @@ export class DocumentsRepository {
       return { modifiedCount: result.modifiedCount };
     }
 
-    return Documents.findOneAndUpdate(query, update, { new: true });
+    return Documents.findOneAndUpdate(query, update, { new: true }).populate(
+      "student"
+    );
   }
 }

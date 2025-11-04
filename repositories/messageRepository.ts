@@ -1,36 +1,44 @@
 import { Message, MessageModel } from "../models/messageModel";
 import { FilterQuery, UpdateQuery } from "mongoose";
 
-// Purpose: This file is responsible for handling all the database operations related to the message model.
 export class MessageRepository {
-  // This method returns a message in the database that matches the id.
   async getMessage(id: string): Promise<MessageModel | null> {
-    return Message.findById(id);
+    return Message.findById(id).populate("sender").populate("receiver").exec();
   }
 
-  // This method returns all the message in the database.
   async getMessages(): Promise<MessageModel[]> {
-    return Message.find();
+    return Message.find().populate("sender").populate("receiver").exec();
   }
 
-  // This method creates a bew message in the database.
   async createMessage(data: Partial<MessageModel>): Promise<MessageModel> {
-    return Message.create(data);
+    const message = await Message.create(data);
+    return message.populate(["sender", "receiver"]);
   }
 
-  // This method updates a message in the database.
-  async updateMessage(id: string, data: Partial<MessageModel>): Promise<MessageModel | null> {
-    return Message.findByIdAndUpdate(id, data, { new: true });
+  async updateMessage(
+    id: string,
+    data: Partial<MessageModel>
+  ): Promise<MessageModel | null> {
+    return Message.findByIdAndUpdate(id, data, { new: true })
+      .populate("sender")
+      .populate("receiver")
+      .exec();
   }
 
-  // This method deletes a message from the database.
   async deleteMessage(id: string): Promise<MessageModel | null> {
-    return Message.findByIdAndDelete(id);
+    return Message.findByIdAndDelete(id)
+      .populate("sender")
+      .populate("receiver")
+      .exec();
   }
 
-  // This method searches for a message in the database that matches the query object.
-  async searchMessage(query: FilterQuery<MessageModel>): Promise<MessageModel | null> {
-    return Message.findOne(query);
+  async searchMessage(
+    query: FilterQuery<MessageModel>
+  ): Promise<MessageModel | null> {
+    return Message.findOne(query)
+      .populate("sender")
+      .populate("receiver")
+      .exec();
   }
 
   async searchAndUpdate(
@@ -39,7 +47,10 @@ export class MessageRepository {
     options?: { multi?: boolean }
   ): Promise<MessageModel | null | { modifiedCount: number }> {
     if (!update) {
-      return Message.findOne(query);
+      return Message.findOne(query)
+        .populate("sender")
+        .populate("receiver")
+        .exec();
     }
 
     if (options?.multi) {
@@ -47,6 +58,9 @@ export class MessageRepository {
       return { modifiedCount: result.modifiedCount };
     }
 
-    return Message.findOneAndUpdate(query, update, { new: true });
+    return Message.findOneAndUpdate(query, update, { new: true })
+      .populate("sender")
+      .populate("receiver")
+      .exec();
   }
 }

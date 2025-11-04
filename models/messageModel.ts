@@ -11,11 +11,11 @@ export interface MessageModel extends Document {
 const MessageSchema = new Schema<MessageModel>(
   {
     sender: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
     receiver: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
     content: {
