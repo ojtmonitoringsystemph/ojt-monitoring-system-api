@@ -1,20 +1,10 @@
 import jwt from "jsonwebtoken";
 import { config } from "../config/constants";
-import {
-  AuthResponse,
-  LoginCredentials,
-  RegisterData,
-  TokenPayload,
-} from "../helpers/interface";
+import { AuthResponse, LoginCredentials, RegisterData, TokenPayload } from "../helpers/interface";
 import { AppError } from "../middleware/errorHandler";
 import { UserModel } from "../models/userModel";
 import { UserRepository } from "../repositories/userRepository";
-import {
-  hashPassword,
-  generateTokens,
-  sanitizeUser,
-  comparePasswords,
-} from "../helpers/auth";
+import { hashPassword, generateTokens, sanitizeUser, comparePasswords } from "../helpers/auth";
 
 // Purpose: This service class is responsible for handling authentication-related business logic including user registration, login, token generation, and password management.
 export class AuthService {
@@ -28,12 +18,12 @@ export class AuthService {
    * Register a new user
    */
   async register(registerData: RegisterData): Promise<AuthResponse> {
-    const { firstName, lastName, middleName, email, password, role, program } =
+    const { firstName, lastName, middleName, email, password, role, program, userName } =
       registerData;
 
     // Basic validation
-    if (!firstName || !lastName || !email || !password) {
-      throw new AppError("Name, email, role, and password are required", 400);
+    if (!firstName || !lastName || !email || !password || !userName) {
+      throw new AppError("Name, email, role, userName, and password are required", 400);
     }
 
     if (password.length < 6) {
@@ -57,6 +47,7 @@ export class AuthService {
 
     // Create user
     const newUser = await this.userRepository.createUser({
+      userName,
       firstName,
       lastName,
       middleName,
@@ -87,17 +78,17 @@ export class AuthService {
    * Login user
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const { email, password, role } = credentials;
+    const { userName, password, role } = credentials;
 
     // Basic validation
-    if (!email || !password || !role) {
-      throw new AppError("Email, role and password are required", 400);
+    if (!userName || !password || !role) {
+      throw new AppError("userName, role and password are required", 400);
     }
 
     // Find user
-    const user = await this.userRepository.searchAndUpdate({ email: email });
+    const user = await this.userRepository.searchAndUpdate({ userName: userName });
     if (!user) {
-      throw new AppError("Invalid email or password", 401);
+      throw new AppError("Invalid userName or password", 401);
     }
 
     // Verify password
@@ -132,9 +123,7 @@ export class AuthService {
   /**
    * Refresh access token
    */
-  async refreshToken(
-    token: string
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(token: string): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const decoded = jwt.verify(token, config.JWT.SECRET) as TokenPayload;
 
@@ -196,10 +185,7 @@ export class AuthService {
     }
 
     // Verify current password
-    const isValidPassword = await comparePasswords(
-      currentPassword,
-      user.password
-    );
+    const isValidPassword = await comparePasswords(currentPassword, user.password);
     if (!isValidPassword) {
       throw new AppError("Current password is incorrect", 400);
     }

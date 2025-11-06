@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 
 // Purpose: Define the user model schema
 export interface UserModel extends Document {
+  userName: string;
   firstName: string;
   lastName: string;
   middleName?: string;
@@ -20,6 +21,10 @@ export interface UserModel extends Document {
 
 const UserSchema = new Schema<UserModel>(
   {
+    userName: {
+      type: String,
+      required: true,
+    },
     firstName: {
       type: String,
       required: true,

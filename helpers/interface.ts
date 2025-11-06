@@ -1,12 +1,13 @@
 import { UserModel } from "@/models/userModel";
 
 export interface LoginCredentials {
-  email: string;
+  userName: string;
   password: string;
   role: "admin" | "coordinator" | "student";
 }
 
 export interface RegisterData {
+  userName: string;
   firstName: string;
   lastName: string;
   middleName: string;
