@@ -33,10 +33,7 @@ export class UserService {
     }
 
     if (!userData.role) {
-      throw new AppError(
-        "Invalid role. Must be admin, coordinator, or student",
-        400
-      );
+      throw new AppError("Invalid role. Must be admin, coordinator, or student", 400);
     }
 
     const existingUserByEmail = await this.userRepository.searchAndUpdate({
@@ -55,10 +52,7 @@ export class UserService {
       throw new AppError("User ID is required", 400);
     }
 
-    const user = await this.userRepository.updateUser(
-      updateData._id,
-      updateData
-    );
+    const user = await this.userRepository.updateUser(updateData._id, updateData);
     if (!user) {
       throw new AppError("User not found", 404);
     }
@@ -77,15 +71,27 @@ export class UserService {
     query: FilterQuery<UserModel>,
     options?: { multiple?: boolean }
   ): Promise<UserModel | UserModel[]> {
+    // Fields that require exact matching (not regex)
+    const exactMatchFields = ["role", "program", "email"];
+
     const caseInsensitiveQuery = Object.keys(query).reduce((acc, key) => {
       const value = query[key];
       if (typeof value === "string") {
-        acc[key] = { $regex: new RegExp(value, "i") };
+        // Use exact match for specific fields, case-insensitive regex for text search fields
+        if (exactMatchFields.includes(key)) {
+          acc[key] = value;
+          console.log(`Exact match for ${key}:`, value);
+        } else {
+          acc[key] = { $regex: new RegExp(value, "i") };
+          console.log(`Regex match for ${key}:`, value);
+        }
       } else {
         acc[key] = value;
       }
       return acc;
     }, {} as FilterQuery<UserModel>);
+
+    console.log("Final MongoDB query:", JSON.stringify(caseInsensitiveQuery));
 
     const { multiple = false } = options || {};
 
@@ -141,10 +147,7 @@ export class UserService {
       },
     };
 
-    const updatedUser = await this.userRepository.updateUser(
-      userId,
-      updateData
-    );
+    const updatedUser = await this.userRepository.updateUser(userId, updateData);
     if (!updatedUser) {
       throw new AppError("Failed to assign user to company", 500);
     }
@@ -179,10 +182,7 @@ export class UserService {
       },
     };
 
-    const updatedUser = await this.userRepository.updateUser(
-      userId,
-      updateData
-    );
+    const updatedUser = await this.userRepository.updateUser(userId, updateData);
     if (!updatedUser) {
       throw new AppError("Failed to unassign user from company", 500);
     }
@@ -218,10 +218,7 @@ export class UserService {
       },
     };
 
-    const updatedUser = await this.userRepository.updateUser(
-      userId,
-      updateData
-    );
+    const updatedUser = await this.userRepository.updateUser(userId, updateData);
     if (!updatedUser) {
       throw new AppError("Failed to update user deployment status", 500);
     }
@@ -230,10 +227,7 @@ export class UserService {
   }
 
   async getUserDashboard(userId: string, userRole: string): Promise<any> {
-    const dashboardData = await this.userRepository.userDashboard(
-      userId,
-      userRole
-    );
+    const dashboardData = await this.userRepository.userDashboard(userId, userRole);
 
     if (!dashboardData || dashboardData.length === 0) {
       throw new AppError("Dashboard data not found", 404);

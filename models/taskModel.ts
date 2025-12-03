@@ -41,7 +41,7 @@ const taskSchema = new Schema<TaskModel>(
     submissionProofUrl: [
       {
         type: String,
-        required: true,
+        required: false,
       },
     ],
   },

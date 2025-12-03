@@ -38,6 +38,7 @@ export class DocumentsController {
       // Create new document with uploaded files
       const documentData = {
         student: req.body.student,
+        documentName: req.body.documentName || "Untitled Document",
         documents: documents,
         status: "pending" as const,
         remarks: req.body.remarks || "",

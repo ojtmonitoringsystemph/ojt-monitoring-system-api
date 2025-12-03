@@ -29,18 +29,16 @@ export class TaskController {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
-      if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
-        throw new AppError("Please upload at least one file", 400);
-      }
-
-      // Upload all files to Cloudinary
+      // Upload all files to Cloudinary (if any)
       const documents: string[] = [];
-      for (const file of req.files) {
-        const task = await this.cloudinaryService.uploadFile(file, "task-documents");
-        documents.push(task);
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        for (const file of req.files) {
+          const task = await this.cloudinaryService.uploadFile(file, "task-documents");
+          documents.push(task);
+        }
       }
 
-      // Create new task with uploaded files
+      // Create new task with or without uploaded files
       const documentData = {
         title: req.body.title,
         description: req.body.description,
