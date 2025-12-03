@@ -26,10 +26,17 @@ export class AnnouncementController {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
+      // Determine target program based on user role and program
+      let targetProgram = "all";
+      if (req.user?.role === "coordinator" && req.user?.program) {
+        targetProgram = req.user.program;
+      }
+
       const announcementData = {
         title: req.body.title,
         content: req.body.content,
         createdBy: req.user!.id as any,
+        targetProgram: req.body.targetProgram || targetProgram,
       };
 
       const announcement = await this.announcementService.createAnnouncement(announcementData);
@@ -50,25 +57,37 @@ export class AnnouncementController {
   };
 
   @route.get("/")
-  getAnnouncements = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getAnnouncements = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
-      const users = await this.announcementService.getAnnouncements();
-      res.json(users);
+      // Get user's program from token or query
+      const userProgram = (req.query.program as string) || req.user?.program;
+
+      const announcements = await this.announcementService.getAnnouncementsForUser(userProgram);
+      res.json(announcements);
     } catch (error) {
       next(error);
     }
   };
 
-  @route.patch("/")
+  @route.patch("/:id")
   updateAnnouncement = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
-      const announcement = await this.announcementService.updateAnnouncement(req.body);
+      const updateData = {
+        ...req.body,
+        _id: req.params.id,
+      };
+
+      const announcement = await this.announcementService.updateAnnouncement(updateData);
       res.json(announcement);
     } catch (error) {
       next(error);

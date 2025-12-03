@@ -22,6 +22,10 @@ export class AnnouncementService {
     return this.announcementRepository.getAnnouncements();
   }
 
+  async getAnnouncementsForUser(userProgram?: string): Promise<AnnouncementModel[]> {
+    return this.announcementRepository.getAnnouncementsForProgram(userProgram);
+  }
+
   async createAnnouncement(data: Partial<AnnouncementModel>) {
     if (!data) {
       throw new AppError("Announcement data are required", 400);

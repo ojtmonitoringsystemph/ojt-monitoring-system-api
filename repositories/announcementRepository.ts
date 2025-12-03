@@ -13,6 +13,19 @@ export class AnnouncementRepository {
     return Announcement.find();
   }
 
+  // This method returns announcements filtered by program
+  async getAnnouncementsForProgram(userProgram?: string): Promise<AnnouncementModel[]> {
+    if (!userProgram) {
+      // If no program specified, return all announcements
+      return Announcement.find().populate("createdBy", "firstName lastName email program role");
+    }
+
+    // Return announcements that target 'all' programs or specifically the user's program
+    return Announcement.find({
+      $or: [{ targetProgram: "all" }, { targetProgram: userProgram }],
+    }).populate("createdBy", "firstName lastName email program role");
+  }
+
   // This method creates a bew announcement in the database.
   async createAnnouncement(data: Partial<AnnouncementModel>): Promise<AnnouncementModel> {
     return Announcement.create(data);
