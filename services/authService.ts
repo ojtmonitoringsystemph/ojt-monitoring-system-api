@@ -62,6 +62,8 @@ export class AuthService {
       id: newUser._id.toString(),
       email: newUser.email,
       firstName: newUser.firstName,
+      role: newUser.role,
+      program: newUser.program,
     });
 
     // Remove password from response
@@ -108,6 +110,7 @@ export class AuthService {
       email: user.email,
       firstName: user.firstName,
       role: user.role,
+      program: user.program,
     });
 
     // Remove password from response
@@ -138,6 +141,8 @@ export class AuthService {
         id: user._id.toString(),
         email: user.email,
         firstName: user.firstName,
+        role: user.role,
+        program: user.program,
       });
 
       return tokens;
