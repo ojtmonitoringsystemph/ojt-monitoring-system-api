@@ -24,11 +24,7 @@ export class UserController {
   }
 
   @route.post("/")
-  createUser = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = await this.userService.createUser(req.body);
       res.json(user);
@@ -38,11 +34,7 @@ export class UserController {
   };
 
   @route.get("/:id")
-  getUser = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = await this.userService.getUser(req.params.id);
       res.json(user);
@@ -52,11 +44,7 @@ export class UserController {
   };
 
   @route.get("/")
-  getUsers = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
@@ -69,11 +57,7 @@ export class UserController {
   };
 
   @route.patch("/")
-  update = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
@@ -86,11 +70,7 @@ export class UserController {
   };
 
   @route.delete("/:id")
-  delete = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
@@ -103,18 +83,16 @@ export class UserController {
   };
 
   @route.post("/search")
-  search = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
+      console.log("User search query received:", req.body);
       const users = await this.userService.searchUser(req.body, {
         multiple: true,
       });
+      console.log("Users found:", Array.isArray(users) ? users.length : 1, "users");
       res.json(users);
     } catch (error) {
       next(error);
@@ -123,11 +101,7 @@ export class UserController {
 
   @route.post("/upload/:id") // user id
   @UseMiddleware(upload.single("image"))
-  async uploadImage(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async uploadImage(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
@@ -136,10 +110,7 @@ export class UserController {
         throw new AppError("Please upload an image", 400);
       }
 
-      const imageUrl = await this.cloudinaryService.uploadImage(
-        req.file,
-        "user-avatars"
-      );
+      const imageUrl = await this.cloudinaryService.uploadImage(req.file, "user-avatars");
       const updateData = {
         _id: req.params.id,
         avatar: imageUrl,
@@ -153,23 +124,15 @@ export class UserController {
   }
 
   @route.post("/assign-company")
-  assignToCompany = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  assignToCompany = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
 
-      const { userId, companyId, deploymentDate, status, coordinatorId } =
-        req.body;
+      const { userId, companyId, deploymentDate, status, coordinatorId } = req.body;
 
       if (!userId || !companyId || !coordinatorId) {
-        throw new AppError(
-          "User ID and Company ID and Coordinator ID are required",
-          400
-        );
+        throw new AppError("User ID and Company ID and Coordinator ID are required", 400);
       }
 
       const user = await this.userService.assignUserToCompany(
@@ -189,11 +152,7 @@ export class UserController {
   };
 
   @route.post("/unassign-company")
-  unassignFromCompany = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  unassignFromCompany = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Require authentication for this endpoint
       await requireAuthentication(req, res);
@@ -231,16 +190,10 @@ export class UserController {
       }
 
       if (!["scheduled", "deployed", "completed"].includes(status)) {
-        throw new AppError(
-          "Invalid status. Must be 'scheduled', 'deployed', or 'completed'",
-          400
-        );
+        throw new AppError("Invalid status. Must be 'scheduled', 'deployed', or 'completed'", 400);
       }
 
-      const user = await this.userService.updateUserDeploymentStatus(
-        userId,
-        status
-      );
+      const user = await this.userService.updateUserDeploymentStatus(userId, status);
       res.json({
         message: "User deployment status updated successfully",
         user,

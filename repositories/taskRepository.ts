@@ -12,7 +12,7 @@ export class TaskRepository {
   async getTasks(): Promise<TaskModel[]> {
     return Task.find()
       .populate("createdBy", "firstName lastName email") // replace with the fields you want from User
-      .populate("assignedTo", "firstName lastName email"); // replace with the fields you want from User
+      .populate("assignedTo", "firstName lastName email program"); // include program field for filtering
   }
 
   // This method returns all tasks for a specific student.
@@ -42,12 +42,20 @@ export class TaskRepository {
 
   // This method adds file URLs to the task's documents array (prevents duplicates)
   async addFilesToSubmissionProof(id: string, documents: string[]): Promise<TaskModel | null> {
-    return Task.findByIdAndUpdate(id, { $addToSet: { submissionProofUrl: { $each: documents } } }, { new: true });
+    return Task.findByIdAndUpdate(
+      id,
+      { $addToSet: { submissionProofUrl: { $each: documents } } },
+      { new: true }
+    );
   }
 
   // This method removes specific file URLs from the task's documents array
   async removeFilesToSubmissionProof(id: string, documents: string[]): Promise<TaskModel | null> {
-    return Task.findByIdAndUpdate(id, { $pullAll: { submissionProofUrl: documents } }, { new: true });
+    return Task.findByIdAndUpdate(
+      id,
+      { $pullAll: { submissionProofUrl: documents } },
+      { new: true }
+    );
   }
 
   async searchAndUpdate(
