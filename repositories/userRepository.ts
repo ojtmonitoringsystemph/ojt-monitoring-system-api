@@ -23,10 +23,7 @@ export class UserRepository {
   }
 
   // This method updates a user in the database.
-  async updateUser(
-    id: string,
-    userData: Partial<UserModel>
-  ): Promise<UserModel | null> {
+  async updateUser(id: string, userData: Partial<UserModel>): Promise<UserModel | null> {
     return User.findByIdAndUpdate(id, userData, { new: true });
   }
 
@@ -55,9 +52,7 @@ export class UserRepository {
   }
 
   // Method overloads for better type safety
-  async searchAndUpdate(
-    query: FilterQuery<UserModel>
-  ): Promise<UserModel | null>;
+  async searchAndUpdate(query: FilterQuery<UserModel>): Promise<UserModel | null>;
   async searchAndUpdate(
     query: FilterQuery<UserModel>,
     update: UpdateQuery<UserModel>,
@@ -135,7 +130,13 @@ export class UserRepository {
             {
               $lookup: {
                 from: "announcements",
-                pipeline: [],
+                pipeline: [
+                  {
+                    $match: {
+                      createdBy: new mongoose.Types.ObjectId(userId),
+                    },
+                  },
+                ],
                 as: "announcements",
               },
             },
@@ -154,9 +155,7 @@ export class UserRepository {
                   {
                     $match: {
                       role: "student",
-                      "metadata.coordinator": new mongoose.Types.ObjectId(
-                        userId
-                      ),
+                      "metadata.coordinator": new mongoose.Types.ObjectId(userId),
                     },
                   },
                   {
