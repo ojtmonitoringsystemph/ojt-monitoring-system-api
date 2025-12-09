@@ -41,6 +41,64 @@ export class DocumentsRepository {
     return Documents.findOne(query).populate("student");
   }
 
+  // Search multiple documents and populate student
+  async searchDocuments(query: FilterQuery<DocumentsModel>): Promise<DocumentsModel[]> {
+    return Documents.find(query).populate("student", "firstName lastName email program");
+  }
+
+  // Search documents including student fields using aggregation
+  async searchDocumentsWithStudent(searchTerm: string): Promise<DocumentsModel[]> {
+    return Documents.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "student",
+          foreignField: "_id",
+          as: "student",
+        },
+      },
+      {
+        $unwind: "$student",
+      },
+      {
+        $match: {
+          $or: [
+            { documentName: { $regex: new RegExp(searchTerm, "i") } },
+            { remarks: { $regex: new RegExp(searchTerm, "i") } },
+            { "student.firstName": { $regex: new RegExp(searchTerm, "i") } },
+            { "student.lastName": { $regex: new RegExp(searchTerm, "i") } },
+            { "student.program": { $regex: new RegExp(searchTerm, "i") } },
+            {
+              $expr: {
+                $regexMatch: {
+                  input: { $concat: ["$student.firstName", " ", "$student.lastName"] },
+                  regex: new RegExp(searchTerm, "i"),
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          documentName: 1,
+          documents: 1,
+          status: 1,
+          remarks: 1,
+          uploadedAt: 1,
+          student: {
+            _id: "$student._id",
+            firstName: "$student.firstName",
+            lastName: "$student.lastName",
+            email: "$student.email",
+            program: "$student.program",
+          },
+        },
+      },
+    ]);
+  }
+
   // Add files to a document and return populated student
   async addFilesToDocument(id: string, documents: string[]): Promise<DocumentsModel | null> {
     return Documents.findByIdAndUpdate(

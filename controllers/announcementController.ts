@@ -39,7 +39,10 @@ export class AnnouncementController {
         targetProgram: req.body.targetProgram || targetProgram,
       };
 
-      const announcement = await this.announcementService.createAnnouncement(announcementData);
+      const announcement = await this.announcementService.createAnnouncement(
+        announcementData,
+        req.user!.id
+      );
       res.json(announcement);
     } catch (error) {
       next(error);

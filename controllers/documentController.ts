@@ -175,4 +175,48 @@ export class DocumentsController {
       next(error);
     }
   }
+
+  @route.patch("/approve/:id")
+  async approveDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
+      // Check if user is coordinator
+      const user = (req as any).user;
+      if (!user || user.role !== "coordinator") {
+        throw new AppError("Only coordinators can approve documents", 403);
+      }
+
+      const { remarks } = req.body;
+      const document = await this.documentService.approveDocument(req.params.id, remarks);
+      res.json({ message: "Document approved successfully", document });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @route.patch("/disapprove/:id")
+  async disapproveDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      // Require authentication for this endpoint
+      await requireAuthentication(req, res);
+
+      // Check if user is coordinator
+      const user = (req as any).user;
+      if (!user || user.role !== "coordinator") {
+        throw new AppError("Only coordinators can disapprove documents", 403);
+      }
+
+      const { remarks } = req.body;
+      if (!remarks || remarks.trim() === "") {
+        throw new AppError("Remarks are required when disapproving a document", 400);
+      }
+
+      const document = await this.documentService.disapproveDocument(req.params.id, remarks);
+      res.json({ message: "Document disapproved", document });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
