@@ -2,13 +2,16 @@ import { FilterQuery } from "mongoose";
 import { AppError } from "../middleware/errorHandler";
 import { MessageModel } from "../models/messageModel";
 import { MessageRepository } from "../repositories/messageRepository";
+import { EmailService } from "./emailService";
 import { Server as SocketIOServer } from "socket.io";
 
 export class MessageService {
   private messageRepository: MessageRepository;
+  private emailService: EmailService;
 
   constructor() {
     this.messageRepository = new MessageRepository();
+    this.emailService = new EmailService();
   }
 
   async getMessage(id: string, userId?: string, io?: SocketIOServer): Promise<MessageModel | null> {
@@ -71,6 +74,14 @@ export class MessageService {
       // Emit to sender for confirmation
       if (message.sender) {
         io.to(String(message.sender)).emit("messageSent", populatedMessage);
+      }
+
+      // Send email notification to recipient
+      try {
+        await this.emailService.sendMessageNotificationToRecipient(message);
+      } catch (error) {
+        console.error("Failed to send message email notification:", error);
+        // Don't throw error to avoid breaking the message creation
       }
     }
 
